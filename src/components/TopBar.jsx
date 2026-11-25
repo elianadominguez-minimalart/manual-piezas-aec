@@ -81,7 +81,7 @@ function RulesMenu() {
             animate={{ opacity: 1, y: 0, scale: 1, transition: { duration: DUR.base, ease: EASE_OUT } }}
             exit={{ opacity: 0, y: -6, scale: 0.98, transition: { duration: DUR.fast } }}
             style={{ transformOrigin: 'top right' }}
-            className="glass soft-lg absolute right-0 z-30 mt-2.5 w-[min(92vw,420px)] rounded-2xl border border-glass-line p-5 text-fg"
+            className="soft-lg absolute right-0 z-30 mt-2.5 w-[min(92vw,420px)] rounded-2xl border border-line bg-surface p-5 text-fg"
           >
             <div className="mb-3 flex items-start justify-between gap-3">
               <p className="m-0 font-display text-base font-semibold">Reglas para todas las piezas</p>
@@ -94,7 +94,7 @@ function RulesMenu() {
                 <motion.div
                   key={k}
                   variants={{ hidden: { opacity: 0, y: 6 }, show: { opacity: 1, y: 0, transition: { duration: DUR.base, ease: EASE_OUT } } }}
-                  className="rounded-xl bg-surface/70 px-3 py-2.5"
+                  className="rounded-xl bg-sunk px-3 py-2.5"
                 >
                   <dt className="text-[11px] font-semibold tracking-wider text-blue uppercase">{k}</dt>
                   <dd className="m-0">{v}</dd>

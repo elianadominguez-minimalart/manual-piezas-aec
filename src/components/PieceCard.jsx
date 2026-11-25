@@ -1,7 +1,7 @@
 import { AnimatePresence, motion } from 'motion/react'
 import { VIDEO_NOTE } from '../data'
 import { DUR, SPRING, collapse, itemVariants } from '../motion'
-import { CheckIcon, ChevronIcon, DeviceIcon, VideoIcon } from './Icons'
+import { CheckIcon, ChevronIcon, DeviceIcon, ImageIcon, VideoIcon } from './Icons'
 
 const devBadge = {
   desktop: ['Desktop', 'bg-blue text-white'],
@@ -171,13 +171,20 @@ export default function PieceCard({ name, rows, selectedId, doneMap, videoMap, o
                 {videoGroups.map((g, i) => (
                   <div key={g.name}>
                     {i > 0 && <div className="mx-2.5 my-1 border-t border-line/70" aria-hidden="true" />}
-                    <p className="m-0 flex flex-wrap items-center gap-1.5 px-2.5 pt-2 pb-0.5 text-[13.5px] font-semibold">
-                      <VideoIcon className="size-4 text-blue" />
-                      {g.name}
-                      {g.name === 'Portada del video' && (
+                    {g.name === 'Portada del video' ? (
+                      <p className="m-0 flex flex-wrap items-center gap-1.5 px-2.5 pt-2 pb-0.5 text-[13.5px] font-semibold">
+                        <ImageIcon className="size-4 text-blue" />
+                        Portada del video
+                        <span className="rounded-full bg-blue-soft px-2 py-px text-[10.5px] font-semibold tracking-wide text-blue-ink uppercase">Imagen</span>
                         <span className="rounded-full bg-warn-soft px-2 py-px text-[10.5px] font-semibold tracking-wide text-warn uppercase">Obligatoria</span>
-                      )}
-                    </p>
+                        <span className="w-full text-[12.5px] font-normal text-muted">Una imagen fija que se ve mientras el video carga.</span>
+                      </p>
+                    ) : (
+                      <p className="m-0 flex flex-wrap items-center gap-1.5 px-2.5 pt-2 pb-0.5 text-[13.5px] font-semibold">
+                        <VideoIcon className="size-4 text-blue" />
+                        {g.name}
+                      </p>
+                    )}
                     <Rows rows={g.rows} joint={false} selectedId={selectedId} doneMap={doneMap} onSelect={onSelect} onToggleDone={onToggleDone} />
                   </div>
                 ))}

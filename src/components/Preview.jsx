@@ -1,8 +1,9 @@
-import { useEffect, useRef } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'motion/react'
 import { SHOTS } from '../data'
 import { DUR, EASE_OUT, SPRING } from '../motion'
-import { DesktopIcon, MobileIcon } from './Icons'
+import { CloseIcon, DesktopIcon, MobileIcon, ZoomIcon } from './Icons'
 
 const viewIcon = (v) => (v === 'Desktop' ? <DesktopIcon className="relative size-[15px]" /> : <MobileIcon className="relative size-[15px]" />)
 const viewOn = { Desktop: 'bg-blue', Mobile: 'bg-yellow' }
@@ -32,6 +33,78 @@ function Zone({ z, zoneRef, children, className = '' }) {
         transition={{ duration: 1.6, repeat: Infinity, ease: 'easeOut' }}
       />
       {children}
+    </motion.div>
+  )
+}
+
+// Captura ampliada encima de la página. Se cierra con Esc, con la X o tocando afuera.
+function Lightbox({ shot, view, z, piece, onClose }) {
+  const scrollRef = useRef(null)
+  const zoneRef = useRef(null)
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose()
+    document.addEventListener('keydown', onKey)
+    const prev = document.body.style.overflow
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = prev
+    }
+  }, [onClose])
+  // En capturas largas, arrancar con la pieza a la vista
+  const onLoad = () => {
+    const sc = scrollRef.current
+    const zone = zoneRef.current
+    if (sc && zone) sc.scrollTop = Math.max(0, zone.offsetTop + zone.offsetParent.offsetTop - sc.clientHeight / 2 + zone.offsetHeight / 2)
+  }
+  return (
+    <motion.div
+      className="glass fixed inset-0 z-40 flex items-center justify-center p-6"
+      initial={{ opacity: 0 }}
+      animate={{ opacity: 1 }}
+      exit={{ opacity: 0 }}
+      transition={{ duration: DUR.base }}
+      onClick={onClose}
+      role="dialog"
+      aria-modal="true"
+      aria-label={`${piece.name}, ${shot.view}, ampliada`}
+    >
+      <motion.div
+        initial={{ opacity: 0, scale: 0.96, y: 10 }}
+        animate={{ opacity: 1, scale: 1, y: 0, transition: { duration: DUR.slow, ease: EASE_OUT } }}
+        exit={{ opacity: 0, scale: 0.98, transition: { duration: DUR.fast } }}
+        onClick={(e) => e.stopPropagation()}
+        className="soft-lg flex max-h-full max-w-full flex-col gap-3 rounded-3xl border border-glass-line bg-surface p-4"
+      >
+        <div className="flex items-center justify-between gap-4">
+          <p className="m-0 flex items-center gap-2 text-[14px]">
+            <b className="font-display font-semibold">{shot.label}</b>
+            <span className={`inline-flex items-center gap-1.5 rounded-full py-0.5 pr-2.5 pl-2 text-xs font-semibold ${viewOn[shot.view]} ${viewText[shot.view]}`}>
+              {viewIcon(shot.view)}
+              {shot.view}
+            </span>
+            <span className="text-muted">
+              {piece.name} · {piece.dim} px
+            </span>
+          </p>
+          <button type="button" onClick={onClose} aria-label="Cerrar" className="cursor-pointer rounded-full p-1.5 text-muted transition-colors hover:bg-sunk hover:text-fg">
+            <CloseIcon className="size-5" />
+          </button>
+        </div>
+        <div ref={scrollRef} className="relative min-h-0 overflow-auto rounded-2xl bg-sunk p-4">
+          <div className="relative mx-auto w-fit overflow-hidden rounded-lg">
+            <img
+              src={`./img/${view}.webp`}
+              width={shot.w}
+              height={shot.h}
+              alt={`${shot.label}, ${shot.view}`}
+              onLoad={onLoad}
+              className={`block h-auto max-w-[min(1200px,calc(100vw-96px))] ${shot.solo ? 'max-h-[calc(100vh-180px)] w-auto' : 'w-[min(1200px,calc(100vw-96px))]'}`}
+            />
+            <Zone z={z} zoneRef={zoneRef} />
+          </div>
+        </div>
+      </motion.div>
     </motion.div>
   )
 }
@@ -77,6 +150,7 @@ function FichaSchematic() {
 export default function Preview({ piece, view, availableViews, onView }) {
   const stageRef = useRef(null)
   const zoneRef = useRef(null)
+  const [zoom, setZoom] = useState(false)
   const isFicha = !!piece.z.ficha
   const keys = Object.keys(piece.z)
   const shot = view && SHOTS[view]
@@ -121,23 +195,40 @@ export default function Preview({ piece, view, availableViews, onView }) {
     body = <p className="p-6 text-center text-[13.5px] text-muted">No es una pieza gráfica: es el color de fondo (bg) de toda la página del micrositio, detrás del patrón.</p>
     caption = null
   } else {
-    const width = shot.w < 600 ? Math.min(shot.w, 340) : shot.w
     title = shot.label
     bodyKey = view
-    body = (
-      <div className="soft relative max-w-full shrink-0 overflow-hidden rounded-lg" style={{ width }}>
-        <img
-          ref={setImg}
-          onLoad={() => centerRef.current()}
-          src={`./img/${view}.webp`}
-          width={shot.w}
-          height={shot.h}
-          alt={`${shot.label}, ${shot.view}`}
-          className="block h-auto w-full"
-        />
-        <Zone z={z} zoneRef={zoneRef} />
-      </div>
-    )
+    if (shot.solo) {
+      // Pieza sola: entra entera en la vista, sin scroll (se achica a lo alto disponible)
+      body = (
+        <div className="soft relative inline-block max-w-full shrink-0 overflow-hidden rounded-lg">
+          <img
+            ref={setImg}
+            src={`./img/${view}.webp`}
+            width={shot.w}
+            height={shot.h}
+            alt={`${shot.label}, ${shot.view}`}
+            className="block h-auto max-h-[388px] w-auto max-w-full lg:max-h-[calc(100vh-var(--bar-h,72px)-236px)]"
+          />
+          <Zone z={z} zoneRef={zoneRef} />
+        </div>
+      )
+    } else {
+      const width = shot.w < 600 ? Math.min(shot.w, 340) : shot.w
+      body = (
+        <div className="soft relative max-w-full shrink-0 overflow-hidden rounded-lg" style={{ width }}>
+          <img
+            ref={setImg}
+            onLoad={() => centerRef.current()}
+            src={`./img/${view}.webp`}
+            width={shot.w}
+            height={shot.h}
+            alt={`${shot.label}, ${shot.view}`}
+            className="block h-auto w-full"
+          />
+          <Zone z={z} zoneRef={zoneRef} />
+        </div>
+      )
+    }
     caption = (
       <>
         <span className={`relative inline-flex items-center gap-1.5 rounded-full py-0.5 pr-2.5 pl-2 text-xs font-semibold ${viewOn[shot.view]} ${viewText[shot.view]}`}>
@@ -172,6 +263,19 @@ export default function Preview({ piece, view, availableViews, onView }) {
               {title}
             </motion.div>
           </AnimatePresence>
+          <div className="flex items-center gap-2">
+          {shot && z && (
+            <motion.button
+              type="button"
+              whileTap={{ scale: 0.94 }}
+              onClick={() => setZoom(true)}
+              title="Ver la captura más grande"
+              className="inline-flex h-[34px] cursor-pointer items-center gap-1.5 rounded-full border border-line/70 bg-surface/60 px-3 text-[13px] font-semibold text-muted transition-colors hover:bg-surface hover:text-fg"
+            >
+              <ZoomIcon className="size-4" />
+              Ampliar
+            </motion.button>
+          )}
           {!isFicha && availableViews.length > 1 && (
             <div className="inline-flex rounded-full border border-line/70 bg-surface/60 p-[3px]" role="group" aria-label="Vista">
               {availableViews.map((k) => {
@@ -199,6 +303,7 @@ export default function Preview({ piece, view, availableViews, onView }) {
               })}
             </div>
           )}
+          </div>
         </div>
 
         <div
@@ -227,6 +332,11 @@ export default function Preview({ piece, view, availableViews, onView }) {
           )}
         </AnimatePresence>
       </div>
+
+      {createPortal(
+        <AnimatePresence>{zoom && shot && z && <Lightbox shot={shot} view={view} z={z} piece={piece} onClose={() => setZoom(false)} />}</AnimatePresence>,
+        document.body,
+      )}
     </motion.aside>
   )
 }

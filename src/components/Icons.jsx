@@ -63,6 +63,19 @@ export const LinkIcon = (p) => (
     <path d="M14 10a4 4 0 0 0-5.66 0l-3 3a4 4 0 0 0 5.66 5.66l1-1" />
   </Svg>
 )
+export const ImageIcon = (p) => (
+  <Svg {...p}>
+    <rect x="3" y="4" width="18" height="16" rx="2" />
+    <circle cx="9" cy="10" r="1.6" />
+    <path d="M21 16l-5-5-9 9" />
+  </Svg>
+)
+export const ZoomIcon = (p) => (
+  <Svg {...p}>
+    <circle cx="11" cy="11" r="7" />
+    <path d="M20 20l-3.5-3.5M11 8v6M8 11h6" />
+  </Svg>
+)
 export const CloseIcon = (p) => (
   <Svg {...p}>
     <path d="M6 6l12 12M18 6L6 18" />

@@ -2,7 +2,7 @@
 // Zonas: [x, y, ancho, alto] relativos a la captura (0–1).
 
 const VC = 'Sin audio, 30 fps (o 24), 6–15 s en loop, exportado con «Web optimized» / «Fast start».'
-const PC = 'Primer cuadro del video. Precios, fechas y legales van en la portada, no en el video.'
+const PC = 'Es una imagen fija (.webp), no un video: el primer cuadro del video. Precios, fechas y legales van en la portada, no en el video.'
 export const VIDEO_NOTE = 'YouTube / Vimeo: lo importante tiene que quedar en la franja central (zona segura). Recomendado: usar .mp4 propio.'
 const NO_MOBILE = 'No se ve en mobile'
 const SAME = 'Misma medida para desktop y mobile.'
