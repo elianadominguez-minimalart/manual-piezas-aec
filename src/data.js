@@ -3,8 +3,7 @@
 
 const VC = 'Sin audio, 30 fps (o 24), 6–15 s en loop, exportado con «Web optimized» / «Fast start».'
 const PC = 'Primer cuadro del video. Precios, fechas y legales van en la portada, no en el video.'
-export const VIDEO_NOTE =
-  'Siempre se entrega con su portada: es lo primero que se ve mientras carga. YouTube / Vimeo: lo importante tiene que quedar en la franja central (zona segura). Recomendado: usar .mp4 propio.'
+export const VIDEO_NOTE = 'YouTube / Vimeo: lo importante tiene que quedar en la franja central (zona segura). Recomendado: usar .mp4 propio.'
 const NO_MOBILE = 'No se ve en mobile'
 const SAME = 'Misma medida para desktop y mobile.'
 
@@ -136,13 +135,37 @@ export const CONTEXTS = {
   },
 }
 
+// Pares desktop ↔ mobile: misma pieza (mismo nombre) en los dos dispositivos.
+// Una versión no puede existir sin la otra, así que cada una conoce a su par.
+function linkPairs(list) {
+  for (const p of list) {
+    if (p.dev === 'ambos') continue
+    const other = list.find((q) => q !== p && q.name === p.name && q.dev === (p.dev === 'desktop' ? 'mobile' : 'desktop'))
+    if (other) p.pair = { id: other.id, dev: other.dev, dim: other.dim }
+  }
+}
+for (const c of Object.values(CONTEXTS)) {
+  linkPairs(c.pieces)
+  linkPairs(c.pieces.flatMap((p) => p.video || []))
+}
+
 export const TOP = [
   ['home', 'Home'],
+  ['mic', 'Micrositios'],
   ['event', 'Home event'],
   ['recetas', 'Recetas'],
-  ['mic', 'Micrositio'],
   ['ficha', 'Ficha de producto'],
 ]
+
+export const TITLES = {
+  home: 'Home',
+  mic1: 'Micrositio · Variante 1',
+  mic2: 'Micrositio · Variante 2',
+  mic3: 'Micrositio · Variante 3',
+  event: 'Home event',
+  recetas: 'Recetas',
+  ficha: 'Ficha de producto',
+}
 
 export const VARIANTS = [
   ['mic1', 'Variante 1', 'Patrón de fondo y botones'],
