@@ -1,0 +1,79 @@
+@import 'tailwindcss';
+
+/* Colores semánticos (claro / oscuro). Azul y amarillo de Arcor en Casa. */
+:root {
+  --bg: #f6f6f6;
+  --surface: #ffffff;
+  --sunk: #eef1f5;
+  --fg: #16202c;
+  --muted: #5b6573;
+  --line: #dfe3e8;
+  --blue: #0071d1;
+  --blue-ink: #0b4f96;
+  --yellow: #ffd43b;
+  --warn: #d6371f;
+  --warn-soft: #fde8e4;
+  --ok: #1f8a4c;
+  --ok-soft: #e3f4ea;
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #0f141a;
+    --surface: #18202a;
+    --sunk: #212b37;
+    --fg: #e9eef4;
+    --muted: #9ea9b6;
+    --line: #2c3846;
+    --blue: #3d9bff;
+    --blue-ink: #9ccbff;
+    --warn: #ff6b52;
+    --warn-soft: #3d1f1a;
+    --ok: #4fca82;
+    --ok-soft: #163626;
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-sunk: var(--sunk);
+  --color-fg: var(--fg);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-blue: var(--blue);
+  --color-blue-ink: var(--blue-ink);
+  --color-yellow: var(--yellow);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-brand: #0071d1;
+  --color-brand-yellow: #ffd43b;
+  --color-mobile-ink: #3d2f00;
+  --font-display: 'Poppins', system-ui, sans-serif;
+  --font-sans: 'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, Menlo, monospace;
+}
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font-family: var(--font-sans);
+  margin: 0;
+}
+
+/* Zona resaltada en la captura: oscurece todo lo demás */
+.zone-sel {
+  border: 3px solid var(--yellow);
+  box-shadow:
+    0 0 0 9999px rgba(6, 24, 48, 0.5),
+    0 0 0 6px rgba(255, 212, 59, 0.35);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
